@@ -19,25 +19,14 @@ services:
     networks:
       - internal
 
-  greeter:
-    build:
-      context: .
-    image: alphabox
-    env_file: docker-compose.env
-    environment:
-      SERVICES: greeter
-    depends_on:
-      - redis
-    networks:
-      - internal
 
-  products:
+  users:
     build:
       context: .
     image: alphabox
     env_file: docker-compose.env
     environment:
-      SERVICES: products
+      SERVICES: users
     depends_on:
       - mongo
       - redis

@@ -25,11 +25,13 @@
     "moleculer-repl": "^0.6.4"
   },
   "dependencies": {
-    "moleculer-web": "^0.9.1",
+    "bcrypt": "^5.0.1",
+    "ioredis": "^4.17.3",
+    "jsonwebtoken": "^8.5.1",
+    "moleculer": "^0.14.13",
     "moleculer-db": "^0.8.4",
     "moleculer-db-adapter-mongo": "^0.4.7",
-    "ioredis": "^4.17.3",
-    "moleculer": "^0.14.13"
+    "moleculer-web": "^0.9.1"
   },
   "engines": {
     "node": ">= 10.x.x"
