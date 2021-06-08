@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "bcrypt": "^5.0.1",
+    "cookie": "^0.4.1",
     "ioredis": "^4.17.3",
     "jsonwebtoken": "^8.5.1",
     "moleculer": "^0.14.13",

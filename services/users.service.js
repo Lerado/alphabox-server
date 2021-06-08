@@ -87,8 +87,7 @@ module.exports = {
 
 			},
 			async handler(ctx) {
-				// let entity = ctx.params.user;
-				let entity = ctx.params;
+				let entity = ctx.params.user;
 				await this.validateEntity(entity); // Data validation
 
 				// Checks if username already exists in db
@@ -152,7 +151,14 @@ module.exports = {
 
 				// Transform user entity (remove password and all protected fields)
 				const doc = await this.transformDocuments(ctx, {}, user);
-				return await this.transformEntity(doc, true, ctx.meta.token);
+				const response = await this.transformEntity(doc, true, ctx.meta.token);
+
+				// Responses headers with http-only cookie containing the token
+				ctx.meta.$responseHeaders = {
+					"Set-Cookie": `Authorization=Bearer-${ response.user.token }`
+				};
+
+				return response;
 			}
 		},
 

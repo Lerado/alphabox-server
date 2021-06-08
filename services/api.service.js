@@ -165,7 +165,12 @@ module.exports = {
 		 */
 		async authorize(ctx, route, req) {
 			// Get the token from the request
-			const token = req.headers['authorization'];
+			let token = req.headers['cookie'] || req.headers['authorization'];
+
+			if (token) {
+				let cookies = require('cookie').parse(token);
+				if (Object.keys(cookies).includes("Authorization")) token = cookies['Authorization']
+			}
 
 			if (token && token.startsWith("Bearer"))
 				token = token.slice(7);
