@@ -7,7 +7,7 @@ const DbService	= require("moleculer-db");
  * @typedef {import('moleculer').Context} Context Moleculer's Context
  */
 
-module.exports = function(collection) {
+module.exports = function(collection, model) {
 	const cacheCleanEventName = `cache.clean.${collection}`;
 
 	const schema = {
@@ -39,27 +39,14 @@ module.exports = function(collection) {
 				ctx.broadcast(cacheCleanEventName);
 			}
 		},
-
-		async started() {
-			// Check the count of items in the DB. If it's empty,
-			// call the `seedDB` method of the service.
-			if (this.seedDB) {
-				const count = await this.adapter.count();
-				if (count == 0) {
-					this.logger.info(`The '${collection}' collection is empty. Seeding the collection...`);
-					await this.seedDB();
-					this.logger.info("Seeding is done. Number of records:", await this.adapter.count());
-				}
-			}
-		}
 	};
 
 	if (process.env.MONGO_URI) {
-		// Mongo adapter
-		const MongoAdapter = require("moleculer-db-adapter-mongo");
+		// Mongoose adapter
+		const MongooseAdapter = require("moleculer-db-adapter-mongoose");
 
-		schema.adapter = new MongoAdapter(process.env.MONGO_URI);
-		schema.collection = collection;
+		schema.adapter = new MongooseAdapter(process.env.MONGO_URI);
+		schema.model = model;
 	} else if (process.env.NODE_ENV === 'test') {
 		// NeDB memory adapter for testing
 		schema.adapter = new DbService.MemoryAdapter();

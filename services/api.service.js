@@ -41,7 +41,7 @@ module.exports = {
 				authentication: false,
 
 				// Enable authorization. Implement the logic into `authorize` method. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Authorization
-				authorization: false,
+				authorization: true,
 
 				// The auto-alias feature allows you to declare your route alias directly in your services.
 				// The gateway will dynamically build the full routes from service schema.
@@ -51,14 +51,14 @@ module.exports = {
 
 				},
 
-				/** 
+				/**
 				 * Before call hook. You can check the request.
-				 * @param {Context} ctx 
-				 * @param {Object} route 
-				 * @param {IncomingRequest} req 
-				 * @param {ServerResponse} res 
+				 * @param {Context} ctx
+				 * @param {Object} route
+				 * @param {IncomingRequest} req
+				 * @param {ServerResponse} res
 				 * @param {Object} data
-				 * 
+				 *
 				onBeforeCall(ctx, route, req, res) {
 					// Set request headers to context meta
 					ctx.meta.userAgent = req.headers["user-agent"];
@@ -66,10 +66,10 @@ module.exports = {
 
 				/**
 				 * After call hook. You can modify the data.
-				 * @param {Context} ctx 
-				 * @param {Object} route 
-				 * @param {IncomingRequest} req 
-				 * @param {ServerResponse} res 
+				 * @param {Context} ctx
+				 * @param {Object} route
+				 * @param {IncomingRequest} req
+				 * @param {ServerResponse} res
 				 * @param {Object} data
 				onAfterCall(ctx, route, req, res, data) {
 					// Async function which return with Promise
@@ -129,29 +129,29 @@ module.exports = {
 		 * @param {IncomingRequest} req
 		 * @returns {Promise}
 		 */
-		async authenticate(ctx, route, req) {
-			// Read the token from header
-			const auth = req.headers["authorization"];
+		// async authenticate(ctx, route, req) {
+		// 	// Read the token from header
+		// 	const auth = req.headers["authorization"];
 
-			if (auth && auth.startsWith("Bearer")) {
-				const token = auth.slice(7);
+		// 	if (auth && auth.startsWith("Bearer")) {
+		// 		const token = auth.slice(7);
 
-				// Check the token. Tip: call a service which verify the token. E.g. `accounts.resolveToken`
-				if (token == "123456") {
-					// Returns the resolved user. It will be set to the `ctx.meta.user`
-					return { id: 1, name: "John Doe" };
+		// 		// Check the token. Tip: call a service which verify the token. E.g. `accounts.resolveToken`
+		// 		if (token == "123456") {
+		// 			// Returns the resolved user. It will be set to the `ctx.meta.user`
+		// 			return { id: 1, name: "John Doe" };
 
-				} else {
-					// Invalid token
-					throw new ApiGateway.Errors.UnAuthorizedError(ApiGateway.Errors.ERR_INVALID_TOKEN);
-				}
+		// 		} else {
+		// 			// Invalid token
+		// 			throw new ApiGateway.Errors.UnAuthorizedError(ApiGateway.Errors.ERR_INVALID_TOKEN);
+		// 		}
 
-			} else {
-				// No token. Throw an error or do nothing if anonymous access is allowed.
-				// throw new E.UnAuthorizedError(E.ERR_NO_TOKEN);
-				return null;
-			}
-		},
+		// 	} else {
+		// 		// No token. Throw an error or do nothing if anonymous access is allowed.
+		// 		// throw new ApiGateway.Errors.UnAuthorizedError(ApiGateway.Errors.ERR_NO_TOKEN);
+		// 		return null;
+		// 	}
+		// },
 
 		/**
 		 * Authorize the request. Check that the authenticated user has right to access the resource.
@@ -164,13 +164,30 @@ module.exports = {
 		 * @returns {Promise}
 		 */
 		async authorize(ctx, route, req) {
-			// Get the authenticated user.
-			const user = ctx.meta.user;
+			// Get the token from the request
+			const token = req.headers['authorization'];
 
-			// It check the `auth` property in action schema.
-			if (req.$action.auth == "required" && !user) {
-				throw new ApiGateway.Errors.UnAuthorizedError("NO_RIGHTS");
+			if (token && token.startsWith("Bearer"))
+				token = token.slice(7);
+
+			// Verify JWT token
+			let user;
+			if (token) {
+				try {
+					user = await ctx.call("users.resolveJWT", { token });
+					if (user) {
+						this.logger.info(`Authentication via JWT: ${ user.username }`);
+						// Reduce user fields and store it in ctx.meta
+						ctx.meta.user = user;
+						ctx.meta.token = token;
+						ctx.meta.user_id = user._id;
+					}
+				}
+				catch (error) {}
 			}
+
+			if (req.$action.auth == "required" && !user)
+				throw new ApiGateway.Errors.UnAuthorizedError();
 		}
 
 	}

@@ -526,7 +526,7 @@
 
 					requests: {
 						users: [
-							{ id: "list", action: "users.list", rest: "/api/users/", response: null, status: null, duration: null, afterResponse: response => !this.fields.userID && (this.fields.userID = response.rows[0]._id) },
+							{ id: "list", action: "users.list", rest: "/api/users/", response: null, status: null, duration: null, afterResponse: response => !this.fields.userID && (this.fields.userID = response.rows[0] ? response.rows[0]._id : "") },
 
 							{ id: "create", action: "users.create", rest: "/api/users/", method: "POST", fields: [
 								{ field: "username", label: "Username", type: "text", paramType: "body", model: "username" },

@@ -29,9 +29,10 @@
     "ioredis": "^4.17.3",
     "jsonwebtoken": "^8.5.1",
     "moleculer": "^0.14.13",
-    "moleculer-db": "^0.8.4",
-    "moleculer-db-adapter-mongo": "^0.4.7",
-    "moleculer-web": "^0.9.1"
+    "moleculer-db": "^0.8.14",
+    "moleculer-db-adapter-mongoose": "^0.8.10",
+    "moleculer-web": "^0.9.1",
+    "mongoose": "^5.12.13"
   },
   "engines": {
     "node": ">= 10.x.x"

@@ -1,13 +1,15 @@
 "use strict";
 
 // Errors handler
-const MoleculerClientError = require("moleculer").Errors;
+const { MoleculerClientError } = require("moleculer").Errors;
 // Bcrypt for password crypting
 const bcrypt = require("bcrypt");
 // JWT based authentication system
 const jwt = require("jsonwebtoken");
 // Database management
 const DbMixin = require("../mixins/db.mixin");
+// User model
+const User = require("../models/user.model");
 
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
@@ -15,12 +17,12 @@ const DbMixin = require("../mixins/db.mixin");
 
 module.exports = {
 	name: "users",
-	// version: 1
+	// version: 1,
 
 	/**
 	 * Mixins
 	 */
-	mixins: [DbMixin("users")],
+	mixins: [DbMixin("users", User)],
 
 	/**
 	 * Settings
@@ -40,7 +42,7 @@ module.exports = {
 		entityValidator: {
 			username: "string|min:3",
 			password: "string|min:6",
-			password_confirmation: "string|equal:password",
+			password_confirmation: { type: "equal", field: "password"},
 			email: "email",
 		}
 	},
@@ -73,11 +75,16 @@ module.exports = {
 		create: {
 			rest: "POST /",
 			params: {
-				// user: "object"
-				username: "string",
-				password: "string",
-				password_confirmation: "string",
-				email: "string",
+				user: {
+					type: "object",
+					props: {
+						username: { type: "string" },
+						password: { type: "string" },
+						password_confirmation: { type: "equal", field: "password", strict: true },
+						email: { type: "email" },
+					}
+				}
+
 			},
 			async handler(ctx) {
 				// let entity = ctx.params.user;
@@ -122,19 +129,16 @@ module.exports = {
 		login: {
 			rest: "POST /login",
 			params: {
-				username: "string",
-				password: "string",
-				// user: {
-				// 	type: "object",
-				// 	props: {
-				// 		username: { type: "string", min: 4 },
-				// 		password: { type: "string", min: 6 }
-				// 	}
-				// }
+				user: {
+					type: "object",
+					props: {
+						username: { type: "string", min: 4 },
+						password: { type: "string", min: 6 }
+					}
+				}
 			},
 			async handler(ctx) {
-				// const { username, password } = ctx.params.user;
-				const { username, password } = ctx.params;
+				const { username, password } = ctx.params.user;
 				const user = await this.adapter.findOne({ username });	// User in database
 
 				// If user not find
@@ -144,7 +148,7 @@ module.exports = {
 				// Compare password to result in db
 				const res = await bcrypt.compare(password, user.password);
 				if (!res)
-					throw new MoleculerClientError("Wrong password", 422, "", [{ field: "username", message: "is not found" }])
+					throw new MoleculerClientError("Wrong password", 422, "", [{ field: "password", message: "is wrong" }])
 
 				// Transform user entity (remove password and all protected fields)
 				const doc = await this.transformDocuments(ctx, {}, user);
