@@ -151,11 +151,11 @@ module.exports = {
 
 				// Transform user entity (remove password and all protected fields)
 				const doc = await this.transformDocuments(ctx, {}, user);
-				const response = await this.transformEntity(doc, true, ctx.meta.token);
+				const response = await this.transformEntity(doc, false, ctx.meta.token);
 
 				// Responses headers with http-only cookie containing the token
 				ctx.meta.$responseHeaders = {
-					"Set-Cookie": `Authorization=Bearer-${ response.user.token }`
+					"Set-Cookie": `Authorization=Bearer-${ response.user.token };SameSite=None;Secure`
 				};
 
 				return response;

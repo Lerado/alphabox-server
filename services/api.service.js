@@ -20,6 +20,22 @@ module.exports = {
 		// Exposed IP
 		ip: "0.0.0.0",
 
+		// Global CORS settings for all routes
+		cors: {
+			// Configures the Access-Control-Allow-Origin header
+			origin: "http://localhost:8080",
+			// Configures the Access-Control-Allow-Methods header
+			methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
+			// Configures the Access-Control-Allow-Headers header
+			allowedHeaders: ['content-type', 'x-requested-with'],
+			// Configures the Access-Control-Exposed-Headers header
+			exposedHeaders: ['set-cookie'],
+			// Configures the Access-Control-Allow-Credentials header
+			credentials: true,
+			// // Configures the Access-Control-Max-Age header
+			maxAge: 3600
+		},
+
 		// Global Express middlewares. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Middlewares
 		use: [],
 
