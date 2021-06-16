@@ -519,6 +519,7 @@
 					menu: [
 						{ id: "home", caption: "Home" },
 						{ id: "users", caption: "Users service" },
+						{ id: "languages", caption: "Languages service" },
 						{ id: "nodes", caption: "Nodes" },
 						{ id: "services", caption: "Services" }
 					],
@@ -554,6 +555,13 @@
 								{ field: "id", label: "ID", type: "text", paramType: "url", model: "userID" }
 							], response: null, status: null, duration: null },
 
+						],
+						languages: [
+							{ id: "check", action: "languages.check", rest: "/api/languages/:lang/check/:word", method: "GET", fields: [
+								{ field: "lang", label: "Language", type: "text", paramType: "url", model: "lang" },
+								{ field: "word", label: "Word", type: "text", paramType: "url", model: "word" }
+							], response: null, status: null, duration: null },
+							{ id: "get", action: "languages.get", rest: "/api/languages/get", method: "GET", fields: [], response: null, status: null, duration: null },
 						]
 					},
 
@@ -561,8 +569,10 @@
 						welcomeName: "John",
 						userID: null,
 						username: "Xiamoi Mi 9T",
-						userEmail: 299,
-						productValue: 1
+						userEmail: "darel.ngogang@gmail.com",
+						productValue: 1,
+						lang: "en",
+						word: ""
 					},
 
 					broker: null,

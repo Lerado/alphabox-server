@@ -64,4 +64,4 @@ typings/
 .idea
 
 # Database files
-data/
+data/*.db
