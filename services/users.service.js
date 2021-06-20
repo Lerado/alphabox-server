@@ -137,7 +137,8 @@ module.exports = {
 				}
 			},
 			async handler(ctx) {
-				const { username, password } = ctx.params.user;
+				// const { username, password } = ctx.params.user;
+				const { username, password } = ctx.params;
 				const user = await this.adapter.findOne({ username });	// User in database
 
 				// If user not find
@@ -151,7 +152,7 @@ module.exports = {
 
 				// Transform user entity (remove password and all protected fields)
 				const doc = await this.transformDocuments(ctx, {}, user);
-				const response = await this.transformEntity(doc, false, ctx.meta.token);
+				const response = await this.transformEntity(doc, true, ctx.meta.token);
 
 				// Responses headers with http-only cookie containing the token
 				ctx.meta.$responseHeaders = {
@@ -170,7 +171,7 @@ module.exports = {
 		 *
 		 * @returns {Object} Resolved user
 		 */
-		resolveToken: {
+		resolveJWT: {
 			cache: {
 				keys: ["token"],
 				ttl: 60 * 60 // an hour
@@ -189,11 +190,31 @@ module.exports = {
 					});
 				});
 
-				//
 				if (decoded.id)
 					return this.getById(decoded.id);
 			}
 		},
+
+		/**
+		 * Get the authenticated user
+		 *
+		 * @actions
+		 *
+		 * @throws {UnAuthorizedError}
+		 * @returns {User} The authenticated
+		 */
+		resolveAuthenticated: {
+			rest: "GET /resolve",
+			auth: "required",
+			async handler(ctx) {
+				// Middleware has already checked authentication here, see api.service.js@authorize
+				// The authenticated user is loaded in ctx.meta
+				const doc = await this.transformDocuments(ctx, {}, ctx.meta.user);
+				const response = await this.transformEntity(doc, true, ctx.meta.token);
+
+				return response;
+			}
+		}
 	},
 
 	/**
@@ -201,7 +222,7 @@ module.exports = {
 	 */
 	methods: {
 		/**
-		 * Generate a JWT tolen from user entity
+		 * Generate a JWT token from user entity
 		 *
 		 * @param {Object} user
 		 */
