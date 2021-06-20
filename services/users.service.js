@@ -137,8 +137,8 @@ module.exports = {
 				}
 			},
 			async handler(ctx) {
-				// const { username, password } = ctx.params.user;
-				const { username, password } = ctx.params;
+				const { username, password } = ctx.params.user;
+				// const { username, password } = ctx.params;
 				const user = await this.adapter.findOne({ username });	// User in database
 
 				// If user not find
