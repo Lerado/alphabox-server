@@ -23,7 +23,7 @@ module.exports = {
 		// Global CORS settings for all routes
 		cors: {
 			// Configures the Access-Control-Allow-Origin header
-			origin: "http://localhost:8080",
+			origin: ["http://localhost:8080,http://localhost:3000"],
 			// Configures the Access-Control-Allow-Methods header
 			methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
 			// Configures the Access-Control-Allow-Headers header

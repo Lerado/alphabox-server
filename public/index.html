@@ -535,10 +535,12 @@
 								{ field: "password_confirmation", label: "Password confirmation", type: "password", paramType: "body", model: "userPasswordConfirm" },
 							], response: null, status: null, duration: null, afterResponse: response => this.fields.userID = response._id  },
 
-							{ id: "create", action: "users.login", rest: "/api/users/login", method: "POST", fields: [
+							{ id: "login", action: "users.login", rest: "/api/users/login", method: "POST", fields: [
 								{ field: "username", label: "Username", type: "text", paramType: "body", model: "username" },
 								{ field: "password", label: "Password", type: "password", paramType: "body", model: "userPassword" },
 							], response: null, status: null, duration: null, afterResponse: response => this.fields.userID = response._id  },
+
+							{ id: "resolve", action: "users.resolve", rest: "/api/users/resolve", method: "GET", fields: [], response: null, status: null, duration: null },
 
 							{ id: "get", action: "users.get", rest: "/api/users/:id", method: "GET", fields: [
 								{ field: "id", label: "ID", type: "text", paramType: "url", model: "userID" }
