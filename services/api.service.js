@@ -23,15 +23,15 @@ module.exports = {
 		// Global CORS settings for all routes
 		cors: {
 			// Configures the Access-Control-Allow-Origin header
-			origin: ["http://localhost:8080,http://localhost:3000"],
+			origin: "*",
 			// Configures the Access-Control-Allow-Methods header
 			methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
 			// Configures the Access-Control-Allow-Headers header
-			allowedHeaders: ['content-type', 'x-requested-with'],
+			allowedHeaders: [],
 			// Configures the Access-Control-Exposed-Headers header
-			exposedHeaders: ['set-cookie'],
+			exposedHeaders: [],
 			// Configures the Access-Control-Allow-Credentials header
-			credentials: true,
+			credentials: false,
 			// // Configures the Access-Control-Max-Age header
 			maxAge: 3600
 		},
@@ -42,6 +42,14 @@ module.exports = {
 		routes: [
 			{
 				path: "/api",
+
+				cors: {
+					origin: ["http://localhost:8080", "http://localhost:3000"],
+					methods: ["GET", "OPTIONS", "POST"],
+					allowedHeaders: ['content-type'],
+					exposedHeaders: ['set-cookie'],
+					credentials: true,
+				},
 
 				whitelist: [
 					"**"
@@ -197,14 +205,14 @@ module.exports = {
 				try {
 					user = await ctx.call("users.resolveJWT", { token });
 					if (user) {
-						this.logger.info(`Authentication via JWT: ${ user.username }`);
+						this.logger.info(`Authentication via JWT: ${user.username}`);
 						// Reduce user fields and store it in ctx.meta
 						ctx.meta.user = user;
 						ctx.meta.token = token;
 						ctx.meta.user_id = user._id;
 					}
 				}
-				catch (error) {}
+				catch (error) { }
 			}
 
 			if (req.$action.auth == "required" && !user)

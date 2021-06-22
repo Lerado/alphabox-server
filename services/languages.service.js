@@ -95,7 +95,7 @@ module.exports = {
 				words: "array"
 			},
 			async handler(ctx) {
-				let { lang, words } = ctx.params;
+				const { lang, words } = ctx.params;
 				// Throws an error if language not supported
 				if (!this.metadata.dictionaries.hasOwnProperty(lang))
 					throw new MoleculerClientError(`Language ${ lang } is not supported`, 404, "", [{ field: "lang", message: "is not supported" }])
@@ -106,6 +106,24 @@ module.exports = {
 				});
 
 				return response;
+			}
+		},
+
+		/**
+		 * Given a certain language, says if the language exist
+		 *
+		 * @actions
+		 * @param {String} lang - The language code
+		 *
+		 * @return {Object} response
+		 */
+		checkLanguage: {
+			params: {
+				lang: "string"
+			},
+			async handler(ctx) {
+				const { lang } = ctx.params;
+				return this.metadata.dictionaries.hasOwnProperty(lang);
 			}
 		}
 	},
@@ -142,7 +160,7 @@ module.exports = {
 		let dictionary;
 		while (dictionary = directory.readSync()) {
 			if (dictionary.isFile() && dictionary.name.endsWith(".json")) {
-				let filename = dictionary.name.replace(".json", "");
+				const filename = dictionary.name.replace(".json", "");
 				dictionary = fs.readFileSync(`${ directory.path }/${ dictionary.name }`);
 				this.metadata.dictionaries[`${ filename }`] = JSON.parse(dictionary);
 			}

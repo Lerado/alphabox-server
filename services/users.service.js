@@ -137,8 +137,8 @@ module.exports = {
 				}
 			},
 			async handler(ctx) {
-				// const { username, password } = ctx.params.user;
-				const { username, password } = ctx.params;
+				const { username, password } = ctx.params.user;
+				// const { username, password } = ctx.params;
 				const user = await this.adapter.findOne({ username });	// User in database
 
 				// If user not find
@@ -156,7 +156,7 @@ module.exports = {
 
 				// Responses headers with http-only cookie containing the token
 				ctx.meta.$responseHeaders = {
-					"Set-Cookie": `Authorization=Bearer-${ response.user.token };SameSite=None;Secure`
+					"Set-Cookie": `Authorization=Bearer-${ response.user.token };SameSite=None;httpOnly;path=/;Secure`
 				};
 
 				return response;
