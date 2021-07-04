@@ -64,7 +64,7 @@ module.exports = {
 		 * @return {Object} response
 		 */
 		check: {
-			rest: "GET /:lang/check/:word",
+			// rest: "GET /:lang/check/:word",
 			params: {
 				lang: "string",
 				word: "string",
@@ -89,7 +89,7 @@ module.exports = {
 		 * @return {Object} response
 		 */
 		checkMultiple: {
-			rest: "POST /:lang/check/multiple",
+			// rest: "POST /:lang/check/multiple",
 			params: {
 				lang: "string",
 				words: "array"
@@ -124,6 +124,38 @@ module.exports = {
 			async handler(ctx) {
 				const { lang } = ctx.params;
 				return this.metadata.dictionaries.hasOwnProperty(lang);
+			}
+		},
+
+		/**
+		 * Returns some words starting by a certain letter and ignoring some other words
+		 *
+		 * @actions
+		 * @param {String} prefix
+		 * @param {Array} except
+		 *
+		 * @return {Object} response
+		 */
+		someWords: {
+			params: {
+				prefix: "string",
+				except: "array",
+				lang: "string",
+				count: "number"
+			},
+			async handler(ctx) {
+				const { prefix, except, lang, count } = ctx.params;
+
+				// Fetch "count" words in the right dictionary
+				let results = [];
+				const possibleWords = Object.keys(this.metadata.dictionaries[lang]).filter(key => key.startsWith(prefix));
+				while (results.length < count) {
+					// Look for a word that is neither in exceptions nor is a word we already choosed before
+					const candidate = possibleWords.find(word => !results.includes(word) && !except.includes(word));
+					results.push(candidate);
+				}
+
+				return results;
 			}
 		}
 	},

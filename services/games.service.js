@@ -78,9 +78,71 @@ module.exports = {
 
 				// Allow demo only for the first five levels
 				if (level >= 5)
-					throw new MoleculerClientError(`Level ${ level } is not allowed to unauthenticated users`, 401, [{ field: "level", message: "is not allowed for unauthenticated users" }]);
+					throw new MoleculerClientError(`Level ${level} is not allowed to unauthenticated users`, 401, [{ field: "level", message: "is not allowed for unauthenticated users" }]);
 
-				return this.getSettings(ctx, lang, level);
+				return await this.getSettings(ctx, lang, level);
+			}
+		},
+
+		/**
+		 * Results for the find words game
+		 *
+		 * @actions
+		 * @param {String} lang
+		 * @param {Number} level
+		 * @param {Array} words
+		 */
+		findWordsResults: {
+			rest: "POST /lang/:lang/level/:level/findwords/results",
+			params: {
+				lang: "string",
+				level: "string",
+				words: "array"
+			},
+			async handler(ctx) {
+				const { lang, level, words } = ctx.params;
+				// Retrieve level informations
+				let levelSettings = await this.getSettings(ctx, lang, level);
+				// Words not starting by the level letter dont even need to be tested
+				let results = {};
+				words.forEach(word => {
+					results[word] = word.toLowerCase().startsWith(levelSettings.letter.toLowerCase())
+				});
+
+				// Call for the languages service to check if words are english ones
+				// Only send words that are still candidates to success
+				let checkInDictionary = await ctx.call("languages.checkMultiple", { lang: lang, words: Object.keys(results).filter(key => results[key]) });
+				Object.keys(checkInDictionary).forEach(word => {
+					results[word] = checkInDictionary[word] && results[word];
+				});
+
+				// Compute scores and counts
+				let score = 0; let total_found = 0;
+				const stepIndex = levelSettings.steps.findIndex(step => step.type === "findWords");
+				if ( stepIndex > -1) {
+					Object.keys(results).forEach(word => {
+						score += results[word] * levelSettings.steps[stepIndex].rewardPerWord;
+						total_found += results[word];
+					});
+				}
+				else
+					throw new MoleculerClientError(`Level ${level} does not exist for language ${lang}`, 404, "", [{ field: "level", message: "does not exist" }]);
+
+				// Propose five other words
+				const someWords = await ctx.call("languages.someWords", { prefix: levelSettings.letter, except: words, lang: lang, count: 5 });
+
+				// Return response
+				const response = {
+					level: Number(level),
+					success: total_found >= levelSettings.steps[stepIndex].required,
+					required: levelSettings.steps[stepIndex].required,
+					results,
+					someWords,
+					score: score,
+					total_found,
+					type: levelSettings.steps[stepIndex].type
+				};
+				return response;
 			}
 		}
 	},
@@ -94,11 +156,11 @@ module.exports = {
 			// Checks if language is supported by the languages service
 			const languageExist = await ctx.call("languages.checkLanguage", { lang });
 			if (!languageExist)
-				throw new MoleculerClientError(`Language ${ lang } is not supported`, 404, "", [{ field: "lang", message: "is not supported" }]);
+				throw new MoleculerClientError(`Language ${lang} is not supported`, 404, "", [{ field: "lang", message: "is not supported" }]);
 
 			// Does level exist already
 			if (!this.metadata.games[lang].hasOwnProperty(level))
-				throw new MoleculerClientError(`Level ${ level } does not exist for language ${ lang }`, 404, "", [{ field: "level", message: "does not exist" }]);
+				throw new MoleculerClientError(`Level ${level} does not exist for language ${lang}`, 404, "", [{ field: "level", message: "does not exist" }]);
 
 			const response = this.metadata.games[lang][level];
 
@@ -118,8 +180,8 @@ module.exports = {
 		while (game = directory.readSync()) {
 			if (game.isFile() && game.name.endsWith('.json')) {
 				const filename = game.name.replace(".json", "");
-				game = fs.readFileSync(`${ directory.path }/${ game.name }`);
-				this.metadata.games[`${ filename }`] = JSON.parse(game);
+				game = fs.readFileSync(`${directory.path}/${game.name}`);
+				this.metadata.games[`${filename}`] = JSON.parse(game);
 			}
 		}
 		directory.closeSync(); // Never forget this
