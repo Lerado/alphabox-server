@@ -156,7 +156,7 @@ module.exports = {
 
 				// Responses headers with http-only cookie containing the token
 				ctx.meta.$responseHeaders = {
-					"Set-Cookie": `Authorization=Bearer-${ response.user.token };SameSite=None;Secure`
+					"Set-Cookie": `Authorization=Bearer-${ response.user.token };SameSite=Lax;httpOnly;path=/;`
 				};
 
 				return response;

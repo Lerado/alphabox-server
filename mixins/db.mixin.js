@@ -59,6 +59,7 @@ module.exports = function(collection, model) {
 		}
 
 		schema.adapter = new DbService.MemoryAdapter({ filename: `./data/${collection}.db` });
+		schema.model = model;
 	}
 
 	return schema;

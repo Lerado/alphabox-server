@@ -1,0 +1,21 @@
+{
+	"1": {
+		"letter": "a",
+		"steps": [
+			{
+				"type": "findWords",
+				"time": {
+					"1": 60,
+					"2": 30,
+					"3": 15
+				},
+				"required": 5,
+				"rewardPerWord": 1
+			}
+		],
+		"rewards": {
+			"stars": 1,
+			"medal": 1
+		}
+	}
+}
